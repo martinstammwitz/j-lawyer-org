@@ -742,6 +742,7 @@ public class ReportService implements ReportServiceRemote, ReportServiceLocal {
         reportPrivs.put(Reports.RPT_ACCOUNTS_ESCROW, PRIVILEGE_COMMON);
         reportPrivs.put(Reports.RPT_ACCOUNTS_EARNINGS, PRIVILEGE_CONFIDENTIAL);
         reportPrivs.put(Reports.RPT_ACCOUNTS_BOOKINGS, PRIVILEGE_CONFIDENTIAL);
+        reportPrivs.put(Reports.RPT_ACCOUNTS_BALANCES, PRIVILEGE_COMMON);
 
         if (!reportPrivs.containsKey(reportId)) {
             throw new Exception("Report " + reportId + " ist nicht definiert");
@@ -1443,6 +1444,25 @@ public class ReportService implements ReportServiceRemote, ReportServiceLocal {
                     + "order by Differenz desc) t1\n"
                     + "where Differenz<>0";
             ReportResultTable mainTable = getTable(true, "Akten mit nicht ausgeglichenem Fremdgeld", query, List.of("FremdgeldEin", "FremdgeldAus", "Differenz"), params);
+
+            result.getTables().add(mainTable);
+
+        } else if (Reports.RPT_ACCOUNTS_BALANCES.equals(reportId)) {
+            // Fremdgeld- und Auslagensalden je Akte aus allen Buchungen, deren Buchungsdatum im
+            // gewaehlten Zeitraum liegt. Mit einem Beginn weit in der Vergangenheit ergibt das den
+            // Bestand zum Ende des Zeitraums (Stichtag), z. B. fuer den Abgleich mit dem Anderkonto.
+            // Einnahmen und Ausgaben werden bewusst nicht ausgegeben (allgemeine Berechtigung).
+            String query = "select * from (\n"
+                    + "select case_id, fileNumber as Aktenzeichen, name as Rubrum, reason as wegen, lawyer as Anwalt, assistant as Sachbearbeiter, "
+                    + "sum(in_escrow) as FremdgeldEin, sum(out_escrow) as FremdgeldAus, sum(in_escrow)-sum(out_escrow) as FremdgeldSaldo, "
+                    + "sum(in_expenditure) as AuslagenEin, sum(out_expenditure) as AuslagenAus, sum(out_expenditure)-sum(in_expenditure) as AuslagenOffen from (\n"
+                    + "select case_id, fileNumber, name, reason, lawyer, assistant, in_escrow, out_escrow, in_expenditure, out_expenditure from case_account_entries\n"
+                    + "left join cases on cases.id=case_account_entries.case_id where entry_date>=? and entry_date<=?\n"
+                    + ") bookings \n"
+                    + "group by case_id) t1\n"
+                    + "where FremdgeldSaldo<>0 or AuslagenOffen<>0\n"
+                    + "order by Aktenzeichen asc";
+            ReportResultTable mainTable = getTable(true, "Saldenliste Fremdgeld und Auslagen", query, List.of("FremdgeldEin", "FremdgeldAus", "FremdgeldSaldo", "AuslagenEin", "AuslagenAus", "AuslagenOffen"), params);
 
             result.getTables().add(mainTable);
 

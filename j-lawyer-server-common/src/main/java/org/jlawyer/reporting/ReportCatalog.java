@@ -714,6 +714,10 @@ public class ReportCatalog {
                 "Akten eines bestimmten Zeitraumes mit nicht ausgeglichenem Fremdgeld",
                 "Finanzen: Controlling", 20, false, true, ReportMetadata.SECURITY_COMMON, "Erstellungsdatum der Akten"));
 
+        reports.add(new ReportMetadata(Reports.RPT_ACCOUNTS_BALANCES, "Saldenliste Fremdgeld und Auslagen",
+                "Akten mit offenem Fremdgeld- oder Auslagensaldo zum Ende des Zeitraums (Stichtag), basierend auf den Buchungsdaten der Aktenkonten",
+                "Finanzen: Controlling", 21, false, true, ReportMetadata.SECURITY_COMMON, "Buchungsdatum (Ende = Stichtag)"));
+
         reports.add(new ReportMetadata(Reports.RPT_ACCOUNTS_EARNINGS, "Ergebnis pro Akte",
                 "Akten eines bestimmten Zeitraumes und deren betriebswirtschaftliches Ergebnis, basierend auf Aktenkonten",
                 "Finanzen: Controlling", 20, false, true, ReportMetadata.SECURITY_CONFIDENTIAL, "Erstellungsdatum der Akten"));

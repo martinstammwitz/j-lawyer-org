@@ -697,6 +697,7 @@ public class Reports {
     public static final String RPT_ACCOUNTS_ESCROW="accounts.escrow";
     public static final String RPT_ACCOUNTS_EARNINGS="accounts.earnings";
     public static final String RPT_ACCOUNTS_BOOKINGS="accounts.bookings";
+    public static final String RPT_ACCOUNTS_BALANCES="accounts.balances";
     
     
 }

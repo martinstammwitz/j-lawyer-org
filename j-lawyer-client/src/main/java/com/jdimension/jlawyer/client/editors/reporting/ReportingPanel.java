@@ -671,6 +671,7 @@ import java.awt.Graphics;
 import java.awt.Image;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import javax.swing.BoxLayout;
@@ -860,6 +861,25 @@ public class ReportingPanel extends javax.swing.JPanel implements ThemeableEdito
         casesWithEscrow.setDefaultEndDate(toDate);
         casesWithEscrow.setDateSelectionLabel("Erstellungsdatum der Akten");
         allReports.add(casesWithEscrow);
+
+        Report accountBalances=new Report();
+        accountBalances.setName("Saldenliste Fremdgeld und Auslagen");
+        accountBalances.setDescription("<html>Akten mit offenem <b>Fremdgeld- oder Auslagensaldo</b> zum Ende des Zeitraums (Stichtag), z. B. f&uuml;r den Abgleich mit dem Anderkonto</html>");
+        accountBalances.setClassName(DynamicReportContainerPanel.class.getName());
+        accountBalances.setCategory("Finanzen: Controlling");
+        accountBalances.setSequence(21);
+        accountBalances.setReportId(Reports.RPT_ACCOUNTS_BALANCES);
+        accountBalances.setTypeChart(false);
+        accountBalances.setTypeTable(true);
+        accountBalances.setSecurityType(Report.SECURITY_COMMON);
+        // Saldo = alle Buchungen bis zum Stichtag, daher beginnt der Zeitraum weit in der Vergangenheit
+        Calendar balancesFrom=Calendar.getInstance();
+        balancesFrom.clear();
+        balancesFrom.set(2000, Calendar.JANUARY, 1);
+        accountBalances.setDefaultBeginDate(balancesFrom.getTime());
+        accountBalances.setDefaultEndDate(new Date());
+        accountBalances.setDateSelectionLabel("Buchungsdatum (Ende = Stichtag)");
+        allReports.add(accountBalances);
         
         Report casesEarnings=new Report();
         casesEarnings.setName("Ergebnis pro Akte");
