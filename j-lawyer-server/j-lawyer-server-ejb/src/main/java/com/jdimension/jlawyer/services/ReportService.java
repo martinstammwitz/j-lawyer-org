@@ -1525,6 +1525,17 @@ public class ReportService implements ReportServiceRemote, ReportServiceLocal {
         return result;
     }
 
+    /**
+     * Converts a numeric database value to a BigDecimal without going through float, so that
+     * sums of monetary columns stay exact to the cent.
+     */
+    private static BigDecimal toBigDecimal(Number n) {
+        if (n instanceof BigDecimal) {
+            return (BigDecimal) n;
+        }
+        return new BigDecimal(n.toString());
+    }
+
     private ReportResultTable getTable(boolean caseIdColumn, String name, String query, List<String> sumColumns, Object... params) {
 
         Set<String> allowedCases = null;
@@ -1588,10 +1599,11 @@ public class ReportService implements ReportServiceRemote, ReportServiceLocal {
                     row[i] = rs.getObject(i + 1);
                     if (sumColumns != null && sumColumns.contains(columnNames[i])) {
                         if (row[i] instanceof Number) {
+                            BigDecimal value = toBigDecimal((Number) row[i]);
                             if (!sumValues.containsKey(columnNames[i])) {
-                                sumValues.put(columnNames[i], (Number) row[i]);
+                                sumValues.put(columnNames[i], value);
                             } else {
-                                sumValues.put(columnNames[i], BigDecimal.valueOf(((Number) row[i]).floatValue()).add(BigDecimal.valueOf(sumValues.get(columnNames[i]).floatValue())));
+                                sumValues.put(columnNames[i], value.add(toBigDecimal(sumValues.get(columnNames[i]))));
                             }
                         }
                     }
